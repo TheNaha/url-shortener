@@ -1,0 +1,273 @@
+openapi: 3.0.0
+info:
+  title: URL Shortener API
+  version: 1.0.0
+  description: API documentation for the URL Shortener web application.
+servers:
+  - url: https://s.thenaha.my.id/api/v1
+    description: Local development server
+security:
+  - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    URL:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The unique ID of the short URL.
+        long_url:
+          type: string
+          format: uri
+          description: The original long URL.
+        short_id:
+          type: string
+          description: The unique short ID.
+        password:
+          type: string
+          nullable: true
+          description: The password for the short URL, if protected.
+        has_password:
+          type: boolean
+          description: Indicates if the URL is password protected.
+        expires_at:
+          type: integer
+          nullable: true
+          description: Unix timestamp when the URL expires.
+        visits:
+          type: integer
+          description: Number of times the short URL has been visited.
+    Visit:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        url_id:
+          type: integer
+          format: int64
+        visited_at:
+          type: integer
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+  responses:
+    UnauthorizedError:
+      description: Access Denied - Invalid or missing API Key.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    BadRequestError:
+      description: Invalid request parameters.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    NotFoundError:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    ServerError:
+      description: Internal server error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+paths:
+  /urls:
+    get:
+      summary: Get all short URLs
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: A list of short URLs.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  urls:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/URL'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      summary: Create a new short URL
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - long_url
+              properties:
+                long_url:
+                  type: string
+                  format: uri
+                custom_id:
+                  type: string
+                length:
+                  type: integer
+                password:
+                  type: string
+                expires_in:
+                  type: string
+                  description: e.g., 60s, 2h, 3d, 1w
+      responses:
+        '201':
+          description: Short URL created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/URL'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /urls/{id}:
+    get:
+      summary: Get a single URL by ID
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the URL to retrieve.
+      responses:
+        '200':
+          description: A single URL object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/URL'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    put:
+      summary: Update a URL by ID
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the URL to update.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                long_url:
+                  type: string
+                  format: uri
+                password:
+                  type: string
+      responses:
+        '200':
+          description: URL updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      summary: Delete a URL by ID
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the URL to delete.
+      responses:
+        '200':
+          description: URL deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /urls/metrics/{shortId}:
+    get:
+      summary: Get metrics for a short URL
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: shortId
+          schema:
+            type: string
+          required: true
+          description: Short ID of the URL to retrieve metrics for.
+      responses:
+        '200':
+          description: A list of visits for the short URL.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  visits:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Visit'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
