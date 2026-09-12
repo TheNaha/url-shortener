@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API documentation for the URL Shortener web application.
 servers:
-  - url: https://s.thenaha.my.id/api/v1
+  - url: http://localhost:3000/api/v1
     description: Local development server
 security:
   - ApiKeyAuth: []

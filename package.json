@@ -1,15 +1,23 @@
 {
-  "name": "urlshortener",
+  "name": "url-shortener",
   "version": "1.0.0",
-  "description": "",
+  "description": "A lightweight URL shortener with Express, SQLite, password-protected links, API key support, and Swagger docs.",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheNaha/url-shortener.git"
+  },
+  "homepage": "https://github.com/TheNaha/url-shortener#readme",
+  "bugs": {
+    "url": "https://github.com/TheNaha/url-shortener/issues"
+  },
   "scripts": {
     "start": "node index.js",
     "test": "node --check index.js && node --check api.js && node --check database.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["url-shortener", "short-url", "express", "sqlite", "api", "link-shortener"],
+  "author": "TheNaha",
+  "license": "MIT",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "chart.js": "^4.5.0",

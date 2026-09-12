@@ -5,26 +5,29 @@ services:
     env_file:
       - .env
     volumes:
-      - ./:/app
-      - /app/node_modules 
-    environment:
-      - NODE_ENV=${NODE_ENV}
-      - SESSION_SECRET=${SESSION_SECRET}
-      - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}
-      - DATABASE_PATH=${DATABASE_PATH}
-      - PORT=${PORT}
+      - ./urlshortener.db:/app/urlshortener.db
     ports:
-      - "${PORT}:3000"
-    mem_limit: 512m
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=proxy
-      - traefik.http.routers.url-shortener.rule=Host(`s.lan.thenaha.my.id`)
-      - traefik.http.services.url-shortener.loadbalancer.server.port=3000
-    networks:
-      - proxy
+      - "3000:3000"
 
-networks:
-  proxy:
-    external: true
+# --- Reverse Proxy (select one) ---
+#
+# Option A — Traefik:
+# Replace with your domain and network. The `proxy` network must be
+# declared in an external compose file or created via `docker network create`.
+#
+#   networks:
+#     - proxy
+#   labels:
+#     - traefik.enable=true
+#     - traefik.http.routers.url-shortener.rule=Host(`your-domain.com`)
+#     - traefik.http.services.url-shortener.loadbalancer.server.port=3000
 
+# Option B — Caddy:
+#   Add to your Caddyfile: reverse_proxy url-shortener:3000
+#
+# Option C — Nginx:
+#   proxy_pass http://localhost:3000;
+
+# networks:
+#   proxy:
+#     external: true
