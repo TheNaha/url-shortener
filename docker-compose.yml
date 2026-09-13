@@ -8,6 +8,12 @@ services:
       - ./urlshortener.db:/app/urlshortener.db
     ports:
       - "3000:3000"
+    networks:
+      - cloudflare
+
+networks:
+  cloudflare:
+    external: true
 
 # --- Reverse Proxy (select one) ---
 #
